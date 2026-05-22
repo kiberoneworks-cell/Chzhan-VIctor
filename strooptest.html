@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Струп-тест: цветные надписи + штраф за ошибку</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #10161c 0%, #1a232e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            background: rgba(18, 28, 35, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 64px;
+            padding: 24px 20px 30px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .game-board {
+            background: #1f2c36;
+            border-radius: 48px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: inset 0 1px 5px #0b1115, 0 10px 20px rgba(0, 0, 0, 0.3);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            background: #0f191f;
+            padding: 12px 20px;
+            border-radius: 60px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #1f2f38;
+            border-radius: 40px;
+            padding: 6px 18px;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            font-weight: bold;
+            box-shadow: inset 0 1px 2px #2e4a58, 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #9bb7c9;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f7d44a;
+            line-height: 1;
+        }
+
+        .target-area {
+            background: #0e171f;
+            border-radius: 40px;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+
+        .target-label {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #93b7cc;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .target-color {
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            margin: 0 auto 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
+            border: 3px solid rgba(255,255,240,0.4);
+        }
+
+        .target-text {
+            font-size: 1.7rem;
+            font-weight: bold;
+            background: #00000055;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+            color: white;
+            text-shadow: 2px 2px 0 #00000080;
+        }
+
+        .timer-container {
+            background: #0e171f;
+            border-radius: 60px;
+            height: 12px;
+            width: 100%;
+            margin: 20px 0 25px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            background: linear-gradient(90deg, #f0b27a, #e67e22);
+            width: 100%;
+            height: 100%;
+            border-radius: 60px;
+            transition: width 10ms linear;
+        }
+
+        .buttons-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 18px 12px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.07s linear;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+            font-family: inherit;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .action-btn.disabled-btn, .action-btn:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+            filter: grayscale(0.1);
+        }
+
+        .message-area {
+            background: #00000080;
+            border-radius: 40px;
+            padding: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ffecb3;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            margin-top: 15px;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #5f7f92;
+        }
+
+        .restart-btn {
+            background: #2c4e66;
+            border: none;
+            border-radius: 60px;
+            padding: 8px 16px;
+            margin-top: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            font-family: inherit;
+            transition: 0.1s linear;
+            box-shadow: 0 3px 0 #0f2a38;
+        }
+        .restart-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0f2a38;
+        }
+
+        @media (max-width: 550px) {
+            .action-btn {
+                min-width: 100px;
+                font-size: 1rem;
+                padding: 14px 8px;
+            }
+            .target-color {
+                width: 90px;
+                height: 90px;
+            }
+            .stat-value {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="game-board">
+        <div class="stats">
+            <div class="stat-card"><span class="stat-label">🏆 ОЧКИ</span><span id="scoreDisplay" class="stat-value">0</span></div>
+            <div class="stat-card"><span class="stat-label">🔥 КОМБО</span><span id="comboDisplay" class="stat-value combo-value">0</span></div>
+        </div>
+
+        <div class="target-area">
+            <div class="target-label">НАЖМИ НА КНОПКУ ТАКОГО ЖЕ ЦВЕТА (игнорируй текст!)</div>
+            <div id="targetColorBox" class="target-color" style="background-color: #e74c3c;"></div>
+            <div id="targetWord" class="target-text">КРАСНЫЙ</div>
+        </div>
+
+        <div class="timer-container">
+            <div id="timerBar" class="timer-bar" style="width: 100%;"></div>
+        </div>
+
+        <div class="buttons-panel" id="buttonsContainer"></div>
+
+        <div id="messageBox" class="message-area">
+            ⚡ Цветные надписи! Выбирай кнопку по её ФОНУ. За ошибку или промедление −5 очков.
+        </div>
+        <footer>🎨 Текст на кнопках написан цветом, который он обозначает, но тебе важен цвет ФОНА!<br>Реагируй быстрее 1 секунды, иначе штраф.</footer>
+        <button id="restartGameBtn" class="restart-btn">🔄 Новая игра</button>
+    </div>
+</div>
+
+<script>
+    // ---------- ЦВЕТА И НАЗВАНИЯ ----------
+    const COLORS = [
+        { code: "#e74c3c", name: "КРАСНЫЙ" },
+        { code: "#3498db", name: "СИНИЙ" },
+        { code: "#2ecc71", name: "ЗЕЛЕНЫЙ" },
+        { code: "#f1c40f", name: "ЖЕЛТЫЙ" }
+    ];
+
+    // Игровые переменные
+    let currentTargetColor = null;       // {code, name}
+    let currentButtons = [];              // массив объектов {colorCode, colorName, textLabel}
+    let score = 0;
+    let combo = 0;
+    let canInteract = true;
+    let timerInterval = null;
+    let roundActive = false;
+    let nextRoundTimeout = null;
+
+    // DOM элементы
+    const targetColorBox = document.getElementById("targetColorBox");
+    const targetWordSpan = document.getElementById("targetWord");
+    const timerBar = document.getElementById("timerBar");
+    const buttonsContainer = document.getElementById("buttonsContainer");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const comboDisplay = document.getElementById("comboDisplay");
+    const messageBox = document.getElementById("messageBox");
+
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+    function getRandomColorObject() {
+        return COLORS[Math.floor(Math.random() * COLORS.length)];
+    }
+
+    // Получить случайное название цвета (НЕ совпадающее с исключением)
+    function getRandomTextLabel(excludeName) {
+        const available = COLORS.filter(c => c.name !== excludeName);
+        const randomIndex = Math.floor(Math.random() * available.length);
+        return available[randomIndex].name;
+    }
+
+    // Получить цвет текста (HEX) по названию цвета
+    function getColorCodeByName(colorName) {
+        const found = COLORS.find(c => c.name === colorName);
+        return found ? found.code : "#ffffff";
+    }
+
+    // Генерация нового раунда
+    function generateNewRound() {
+        // 1. Целевой цвет
+        currentTargetColor = getRandomColorObject();
+        targetColorBox.style.backgroundColor = currentTargetColor.code;
+        targetWordSpan.textContent = currentTargetColor.name;
+
+        // 2. Формируем 3 цвета для кнопок: обязательно один совпадает с target, два других – случайные уникальные
+        const targetColorCode = currentTargetColor.code;
+        const otherColors = COLORS.filter(c => c.code !== targetColorCode);
+        // перемешиваем
+        for (let i = otherColors.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [otherColors[i], otherColors[j]] = [otherColors[j], otherColors[i]];
+        }
+        const secondColorObj = otherColors[0];
+        const thirdColorObj = otherColors[1];
+        let buttonColors = [currentTargetColor, secondColorObj, thirdColorObj];
+        // перемешиваем порядок кнопок
+        for (let i = buttonColors.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [buttonColors[i], buttonColors[j]] = [buttonColors[j], buttonColors[i]];
+        }
+
+        // 3. Для каждой кнопки: текст – случайное название, НЕ совпадающее с её цветом
+        currentButtons = [];
+        for (let i = 0; i < buttonColors.length; i++) {
+            const btnColorObj = buttonColors[i];
+            let textLabel;
+            do {
+                textLabel = getRandomTextLabel(btnColorObj.name);
+            } while (textLabel === btnColorObj.name);
+            currentButtons.push({
+                colorCode: btnColorObj.code,
+                colorName: btnColorObj.name,
+                textLabel: textLabel
+            });
+        }
+
+        renderButtons();
+
+        // сброс таймера и интерактива
+        resetTimerAndInteraction();
+    }
+
+    function renderButtons() {
+        buttonsContainer.innerHTML = "";
+        for (let i = 0; i < currentButtons.length; i++) {
+            const btn = currentButtons[i];
+            const buttonEl = document.createElement("button");
+            buttonEl.className = "action-btn";
+            buttonEl.style.backgroundColor = btn.colorCode;
+            // ЦВЕТ ТЕКСТА = цвету написанного слова (надпись цветная)
+            const textColor = getColorCodeByName(btn.textLabel);
+            buttonEl.style.color = textColor;
+            buttonEl.textContent = btn.textLabel;
+            buttonEl.setAttribute("data-index", i);
+            buttonEl.addEventListener("click", () => onButtonClick(i));
+            buttonsContainer.appendChild(buttonEl);
+        }
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        let timeLeft = 1000; // мс
+        timerBar.style.width = "100%";
+        const startTimestamp = performance.now();
+        timerInterval = setInterval(() => {
+            if (!roundActive) return;
+            const now = performance.now();
+            const elapsed = now - startTimestamp;
+            const remaining = Math.max(0, 1000 - elapsed);
+            const percent = (remaining / 1000) * 100;
+            timerBar.style.width = `${percent}%`;
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                if (roundActive) {
+                    handleTimeout();
+                }
+            }
+        }, 10);
+    }
+
+    function resetTimerAndInteraction() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        if (nextRoundTimeout) clearTimeout(nextRoundTimeout);
+        roundActive = true;
+        canInteract = true;
+        enableButtons(true);
+        startTimer();
+    }
+
+    function enableButtons(enabled) {
+        const btns = document.querySelectorAll(".action-btn");
+        btns.forEach(btn => {
+            if (enabled) {
+                btn.disabled = false;
+                btn.classList.remove("disabled-btn");
+            } else {
+                btn.disabled = true;
+                btn.classList.add("disabled-btn");
+            }
+        });
+    }
+
+    // Штраф за ошибку или таймаут
+    function applyPenalty() {
+        const penalty = 5;
+        score = Math.max(0, score - penalty);
+        combo = 0;
+        updateStatsUI();
+        return penalty;
+    }
+
+    // Обработка нажатия кнопки
+    function onButtonClick(index) {
+        if (!roundActive || !canInteract) return;
+        const clickedBtn = currentButtons[index];
+        const isCorrect = (clickedBtn.colorName === currentTargetColor.name);
+
+        // останавливаем раунд
+        canInteract = false;
+        roundActive = false;
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        if (isCorrect) {
+            // Начисляем очки
+            const basePoints = 10;
+            const comboBonus = combo * 2;
+            const earned = basePoints + comboBonus;
+            score += earned;
+            combo++;
+            updateStatsUI();
+            messageBox.innerHTML = `✅ ВЕРНО! +${earned} очков! (комбо x${combo})`;
+        } else {
+            // Неверный ответ: штраф
+            const penalty = applyPenalty();
+            updateStatsUI();
+            messageBox.innerHTML = `❌ НЕВЕРНО! Нужен цвет «${currentTargetColor.name}». Штраф −${penalty} очков. Комбо сброшено.`;
+        }
+        scheduleNextRound();
+    }
+
+    function handleTimeout() {
+        if (!roundActive) return;
+        roundActive = false;
+        canInteract = false;
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        const penalty = applyPenalty();
+        updateStatsUI();
+        messageBox.innerHTML = `⏰ ВРЕМЯ ВЫШЛО! (нужно быстрее 1 секунды). Штраф −${penalty} очков. Комбо сброшено.`;
+        scheduleNextRound();
+    }
+
+    function scheduleNextRound() {
+        if (nextRoundTimeout) clearTimeout(nextRoundTimeout);
+        enableButtons(false);
+        nextRoundTimeout = setTimeout(() => {
+            generateNewRound();
+        }, 500);
+    }
+
+    function updateStatsUI() {
+        scoreDisplay.textContent = score;
+        comboDisplay.textContent = combo;
+    }
+
+    function initGame() {
+        score = 0;
+        combo = 0;
+        updateStatsUI();
+        generateNewRound();
+    }
+
+    function restartGame() {
+        if (timerInterval) clearInterval(timerInterval);
+        if (nextRoundTimeout) clearTimeout(nextRoundTimeout);
+        roundActive = false;
+        canInteract = false;
+        initGame();
+    }
+
+    // Кнопка перезапуска
+    document.getElementById("restartGameBtn").addEventListener("click", () => restartGame());
+
+    initGame();
+</script>
+</body>
+</html>
