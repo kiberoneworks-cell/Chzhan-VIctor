@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Виктор Чжан | Портфолио разработчика</title>
+  <!-- Font Awesome 6 (бесплатные иконки) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Roboto', sans-serif;
+      background: linear-gradient(145deg, #f5f9ff 0%, #eef2f9 100%);
+      color: #1a2a3f;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* стековые карточки, тени */
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(2px);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.02);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      padding: 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 40px -16px rgba(0, 20, 50, 0.2);
+    }
+
+    /* шапка профиля */
+    .profile {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      background: linear-gradient(115deg, #ffffff 0%, #fef9e6 100%);
+      border-radius: 2rem;
+      padding: 1.8rem 2rem;
+      box-shadow: 0 15px 30px -12px rgba(0, 0, 0, 0.08);
+    }
+
+    .avatar {
+      background: linear-gradient(135deg, #2b6e9e, #1f4e6e);
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 20px -8px rgba(0, 32, 64, 0.3);
+      border: 3px solid white;
+    }
+
+    .avatar span {
+      font-size: 3.2rem;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .profile-info h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(120deg, #1e4b6e, #3581a5);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .profile-info .tagline {
+      font-size: 1.1rem;
+      color: #2c5a74;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .badge {
+      background: #eef2fc;
+      padding: 0.3rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1f5a7e;
+    }
+
+    /* сетки */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(120deg, #1a3e55, #2c6b8f);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .section-title:after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 55%;
+      height: 3px;
+      background: linear-gradient(90deg, #3082a5, #a0c4e2);
+      border-radius: 3px;
+    }
+
+    /* список навыков */
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .skill-tag {
+      background: white;
+      border-radius: 60px;
+      padding: 0.45rem 1.2rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      border: 1px solid #cde1ef;
+      transition: all 0.2s;
+    }
+
+    .skill-tag i {
+      margin-right: 6px;
+      color: #2c7aa0;
+    }
+
+    /* проекты: сетка карточек */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 0.5rem;
+    }
+
+    .project-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      transition: all 0.25s;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(128, 164, 184, 0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #2f7b9e;
+    }
+
+    .project-card h3 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .project-desc {
+      color: #3d556b;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef2fb;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      color: #1e5777;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      width: fit-content;
+      border: 1px solid transparent;
+    }
+
+    .project-link i {
+      font-size: 0.9rem;
+      transition: transform 0.2s;
+    }
+
+    .project-link:hover {
+      background: #2b6b8f;
+      color: white;
+      border-color: #ffffff80;
+      transform: scale(0.98);
+    }
+
+    .project-link:hover i {
+      transform: translateX(4px);
+    }
+
+    /* контакты */
+    .contact-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: flex-start;
+      margin-top: 1rem;
+    }
+
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      padding: 0.6rem 1.4rem;
+      border-radius: 60px;
+      transition: 0.2s;
+      text-decoration: none;
+      color: #1a4d68;
+      font-weight: 500;
+      border: 1px solid #bbd2e2;
+    }
+
+    .contact-item i {
+      font-size: 1.2rem;
+    }
+
+    .contact-item:hover {
+      background: #2b6b8f;
+      color: white;
+      border-color: white;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      padding: 1.5rem;
+      color: #5b758b;
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(64, 112, 144, 0.2);
+    }
+
+    /* тост уведомления */
+    #toast-message {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #1f3b4c;
+      color: #f0f6fd;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      backdrop-filter: blur(12px);
+      background-color: rgba(25, 55, 75, 0.92);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transition: opacity 0.3s, transform 0.2s;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      font-family: monospace;
+      letter-spacing: 0.3px;
+    }
+
+    /* адаптив */
+    @media (max-width: 720px) {
+      .container {
+        padding: 1.2rem;
+      }
+      .profile {
+        flex-direction: column;
+        text-align: center;
+      }
+      .profile-info .tagline {
+        justify-content: center;
+      }
+      .section-title:after {
+        width: 35%;
+      }
+      .contact-flex {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    button, a {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Блок с аватаром и основной информацией -->
+  <div class="profile">
+    <div class="avatar">
+      <span>ВЧ</span>
+    </div>
+    <div class="profile-info">
+      <h1>Чжан Виктор</h1>
+      <div class="tagline">
+        <span><i class="fas fa-code"></i> Программист, веб-разработчик</span>
+        <span class="badge"><i class="fas fa-map-marker-alt"></i> Иркутск, Россия</span>
+        <span class="badge" id="dynamic-age-badge"><i class="fas fa-birthday-cake"></i> возраст: <span id="age-value">--</span> лет</span>
+      </div>
+      <p style="margin-top: 0.75rem; color:#2b5d7c;"><i class="fas fa-calendar-alt"></i> Дата рождения: 24 февраля 2012</p>
+    </div>
+  </div>
+
+  <!-- Сетка: О себе + Навыки -->
+  <div class="grid-2">
+    <div class="card">
+      <h2 class="section-title" style="font-size: 1.6rem; margin-bottom: 1rem;">🧑‍💻 Обо мне</h2>
+      <p style="margin-bottom: 0.8rem;">Привет! Я Виктор, мне <strong id="age-in-text">--</strong> лет, и я увлечён программированием с ранних лет. Живу в красивом городе Иркутск — «ворота Байкала».</p>
+      <p style="margin-bottom: 0.8rem;">Создаю веб-сайты, игры и интерактивные приложения. Постоянно учусь новым технологиям, участвую в онлайн-хакатонах и обожаю решать сложные задачи. Моя цель — делать цифровые продукты полезными и красивыми.</p>
+      <p><i class="fas fa-rocket"></i> <strong>Сейчас изучаю:</strong> React, Node.js, создание телеграм-ботов.</p>
+    </div>
+    <div class="card">
+      <h2 class="section-title" style="font-size: 1.6rem; margin-bottom: 1rem;">🛠️ Технологии</h2>
+      <div class="skills-list">
+        <span class="skill-tag"><i class="fab fa-html5"></i> HTML5</span>
+        <span class="skill-tag"><i class="fab fa-css3-alt"></i> CSS3</span>
+        <span class="skill-tag"><i class="fab fa-js"></i> JavaScript (ES6+)</span>
+        <span class="skill-tag"><i class="fab fa-python"></i> Python</span>
+        <span class="skill-tag"><i class="fab fa-react"></i> React</span>
+        <span class="skill-tag"><i class="fas fa-database"></i> SQLite</span>
+        <span class="skill-tag"><i class="fab fa-git-alt"></i> Git/GitHub</span>
+        <span class="skill-tag"><i class="fas fa-mobile-alt"></i> Адаптивная вёрстка</span>
+      </div>
+      <div style="margin-top: 1.8rem;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.4rem;"><i class="fas fa-heart" style="color:#e06767;"></i> Увлечения</h3>
+        <p>Робототехника, шахматы, open-source проекты, создание инди-игр. Люблю кататься на велосипеде по набережной Ангары.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Блок ПРОЕКТЫ: список проектов + обязательные ссылки -->
+  <div style="margin-top: 1rem;">
+    <h2 class="section-title"><i class="fas fa-laptop-code"></i> Мои проекты</h2>
+    <div class="projects-grid" id="projects-container">
+      <!-- проект 1 -->
+      <div class="project-card">
+        <div class="project-icon"><i class="fas fa-cloud-sun"></i></div>
+        <h3>WeatherVue</h3>
+        <p class="project-desc">Интерактивное приложение погоды с геолокацией, динамическими иконками и графиком температуры на 5 дней.</p>
+        <a href="#" class="project-link" data-project="WeatherVue">Посмотреть проект <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <!-- проект 2 -->
+      <div class="project-card">
+        <div class="project-icon"><i class="fas fa-question-circle"></i></div>
+        <h3>Quiz Master</h3>
+        <p class="project-desc">Викторина на JS с таймером, разными категориями и подсчётом очков. Адаптивный дизайн.</p>
+        <a href="#" class="project-link" data-project="Quiz Master">Посмотреть проект <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <!-- проект 3 -->
+      <div class="project-card">
+        <div class="project-icon"><i class="fas fa-tasks"></i></div>
+        <h3>ToDo Flow</h3>
+        <p class="project-desc">Менеджер задач с LocalStorage, фильтрацией и drag-n-drop. Поддержка тёмной темы.</p>
+        <a href="#" class="project-link" data-project="ToDo Flow">Посмотреть проект <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <!-- проект 4 -->
+      <div class="project-card">
+        <div class="project-icon"><i class="fas fa-gamepad"></i></div>
+        <h3>Snake Classic</h3>
+        <p class="project-desc">Классическая игра «Змейка» на чистом JS, таблица рекордов и плавное управление.</p>
+        <a href="#" class="project-link" data-project="Snake Classic">Посмотреть проект <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <!-- доп. проект 5, чтобы портфолио выглядело насыщеннее (ссылка тоже обязана быть) -->
+      <div class="project-card">
+        <div class="project-icon"><i class="fas fa-calculator"></i></div>
+        <h3>SmartCalc</h3>
+        <p class="project-desc">Калькулятор с расширенными функциями: история вычислений, поддержка клавиатуры и плавающая точка.</p>
+        <a href="#" class="project-link" data-project="SmartCalc">Посмотреть проект <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <p style="margin-top: 0.8rem; font-size: 0.85rem; color:#3a6f8f;"><i class="fas fa-link"></i> * ссылки на проекты ведут на демо-страницы (в разработке — нажмите, чтобы увидеть уведомление)</p>
+  </div>
+
+  <!-- Блок контактов + соцсети -->
+  <div style="margin: 2.5rem 0 1rem;">
+    <h2 class="section-title"><i class="fas fa-paper-plane"></i> Контакты и связь</h2>
+    <div class="card" style="padding: 1.5rem;">
+      <div class="contact-flex">
+        <a href="#" class="contact-item demo-contact" data-contact="email"><i class="fas fa-envelope"></i> v.zhang@dev.me</a>
+        <a href="#" class="contact-item demo-contact" data-contact="github"><i class="fab fa-github"></i> github.com/viktorzhang</a>
+        <a href="#" class="contact-item demo-contact" data-contact="telegram"><i class="fab fa-telegram"></i> @viktor_coding</a>
+        <a href="#" class="contact-item demo-contact" data-contact="discord"><i class="fab fa-discord"></i> viktor.zhang</a>
+      </div>
+      <p style="margin-top: 1.2rem; font-size: 0.9rem;"><i class="fas fa-location-dot"></i> г. Иркутск, Россия • открыт для коллабораций и фриланса</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Чжан Виктор — портфолио юного разработчика. Все проекты являются результатом самостоятельного обучения.</p>
+    <p style="margin-top: 0.3rem;"><i class="fas fa-code-branch"></i> Сайт создан с любовью к программированию</p>
+  </footer>
+</div>
+
+<!-- элемент для тост-уведомлений -->
+<div id="toast-message"></div>
+
+<script>
+  (function() {
+    // ---------- 1. ВОЗРАСТ ИЗ ДАТЫ РОЖДЕНИЯ 24.02.2012 ----------
+    function calculateAge(birthDateStr) {
+      const birth = new Date(birthDateStr);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    const birthString = '2012-02-24'; // 24 февраля 2012
+    const ageNow = calculateAge(birthString);
+    
+    const ageSpan = document.getElementById('age-value');
+    const ageInTextSpan = document.getElementById('age-in-text');
+    if (ageSpan) ageSpan.textContent = ageNow;
+    if (ageInTextSpan) ageInTextSpan.textContent = ageNow;
+    // также можно обновить бейдж
+    const ageBadgeSpan = document.querySelector('#dynamic-age-badge');
+    if (ageBadgeSpan) {
+      // уже содержит внутри, обновим вложенный span
+      // переписывать не нужно, главное чтобы отображалось актуально.
+    }
+    // дополнительная проверка в тексте 'мне X лет' уже есть
+
+    // ---------- 2. СИСТЕМА ТОСТОВ (ВЕЖЛИВЫЕ УВЕДОМЛЕНИЯ ДЛЯ ССЫЛОК) ----------
+    const toastEl = document.getElementById('toast-message');
+    let toastTimeout = null;
+
+    function showToast(message, duration = 2200) {
+      if (!toastEl) return;
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastEl.textContent = message;
+      toastEl.style.opacity = '1';
+      toastEl.style.transform = 'translateY(0px)';
+      toastTimeout = setTimeout(() => {
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateY(20px)';
+      }, duration);
+    }
+
+    // ---------- 3. ОБРАБОТЧИКИ ДЛЯ ВСЕХ ССЫЛОК ПРОЕКТОВ ----------
+    const projectLinks = document.querySelectorAll('.project-link');
+    projectLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const projectName = link.getAttribute('data-project') || 'этот проект';
+        showToast(`🔗 Ссылка на проект «${projectName}» — демо-версия скоро будет доступна! Спасибо за интерес ✨`, 2500);
+      });
+    });
+
+    // ---------- 4. ОБРАБОТЧИКИ ДЛЯ КОНТАКТОВ (ДЕМО-РЕЖИМ) ----------
+    const contactItems = document.querySelectorAll('.demo-contact');
+    contactItems.forEach(contact => {
+      contact.addEventListener('click', (e) => {
+        e.preventDefault();
+        const contactType = contact.getAttribute('data-contact') || 'контакт';
+        let msg = '';
+        switch(contactType) {
+          case 'email': msg = '📧 Почта: v.zhang@dev.me — напишите мне, я отвечу в ближайшее время!'; break;
+          case 'github': msg = '🐙 GitHub-профиль: github.com/viktorzhang — там лежат мои репозитории (демо-режим)'; break;
+          case 'telegram': msg = '💬 Telegram: @viktor_coding — связь для коллабораций (демо-контакт)'; break;
+          case 'discord': msg = '🎮 Discord: viktor.zhang — присоединяйтесь к серверу разработчиков'; break;
+          default: msg = 'Контактная информация временно тестовая, но вы можете связаться через форму (в разработке)';
+        }
+        showToast(msg, 2800);
+      });
+    });
+
+    // ---------- 5. БОНУС: красивое приветствие при загрузке (адаптивность возраста уже есть) ----------
+    console.log(`Портфолио Виктора Чжана, возраст: ${ageNow} лет, Иркутск — загрузка завершена`);
+
+    // дополнительно: если какие-то внешние ссылки или ещё что, предотвращаем переход для всех a с классом project-link / contact-item (уже обработали)
+    // также защита от случайных переходов в проектах через хеш
+    const allDemoAnchors = document.querySelectorAll('.project-link, .demo-contact');
+    allDemoAnchors.forEach(anchor => {
+      anchor.setAttribute('href', 'javascript:void(0);');
+      // но обработчики уже стоят, поэтому дополнительно не нужно ломать
+    });
+    
+    // Обновим текст в блоке о возрасте в тексте (на всякий случай)
+    const aboutAgeSpans = document.querySelectorAll('#age-value, #age-in-text');
+    aboutAgeSpans.forEach(el => { if(el) el.textContent = ageNow; });
+    
+    // добавим микро-анимацию при загрузке для карточек проектов (необязательно)
+    const cards = document.querySelectorAll('.project-card');
+    cards.forEach((card, idx) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(12px)';
+      setTimeout(() => {
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, idx * 60);
+    });
+  })();
+</script>
+</body>
+</html>
