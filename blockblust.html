@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Block Blast — цветная головоломка с предпросмотром</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(30, 40, 50, 0.6);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 20px 20px 30px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .game-panel {
+            background: #1e2b36;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: inset 0 0 6px #0a1116, 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .score-box {
+            background: #0f1a1f;
+            padding: 8px 24px;
+            border-radius: 60px;
+            color: #f7d44a;
+            font-weight: bold;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            box-shadow: inset 0 1px 3px #00000055, 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        .score-box span {
+            font-size: 1rem;
+            color: #bdd4e2;
+            margin-right: 8px;
+        }
+
+        .restart-btn {
+            background: #f4a261;
+            border: none;
+            font-size: 1.2rem;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #2d2f36;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 3px 0 #b1622c;
+            font-family: inherit;
+        }
+
+        .restart-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b1622c;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            cursor: crosshair;
+        }
+
+        #boardCanvas {
+            background-color: #243b47;
+            width: 400px;
+            height: 400px;
+        }
+
+        .shapes-area {
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        .shapes-title {
+            color: #bdd4e2;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .shapes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            row-gap: 20px;
+        }
+
+        .shape-card {
+            background: #2d4453;
+            border-radius: 28px;
+            padding: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #10242e;
+            border: 2px solid transparent;
+        }
+
+        .shape-card.active {
+            border: 2px solid #ffd966;
+            background: #3e5f70;
+            box-shadow: 0 0 0 2px #f9c74f, 0 6px 0 #10242e;
+            transform: scale(0.98);
+        }
+
+        .shape-canvas {
+            background: #1f343f;
+            border-radius: 16px;
+            display: block;
+            width: 90px;
+            height: 90px;
+        }
+
+        .game-over-msg {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            background: #aa2e4ecc;
+            backdrop-filter: blur(8px);
+            padding: 8px;
+            border-radius: 60px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 16px;
+            color: #658aa0;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <div class="game-panel">
+            <div class="header">
+                <div class="score-box"><span>🎯 ОЧКИ</span> <span id="scoreValue">0</span></div>
+                <button class="restart-btn" id="restartGame">🔄 Новая игра</button>
+            </div>
+            <canvas id="boardCanvas" width="400" height="400"></canvas>
+
+            <div class="shapes-area">
+                <div class="shapes-title">▼ ВЫБЕРИ ФИГУРУ ▼</div>
+                <div class="shapes-container" id="shapesContainer"></div>
+            </div>
+            <div id="gameOverMsg" class="game-over-msg" style="display: none;">💀 ИГРА ОКОНЧЕНА 💀<br>Нажми «Новая игра»</div>
+        </div>
+        <footer>🎨 наведи на поле — увидишь, куда встанет фигура. Зелёное = можно, красное = нельзя. Блоки сохраняют цвета!</footer>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- НАСТРОЙКИ ПОЛЯ ----------
+        const BOARD_SIZE = 8;
+        const CELL_SIZE = 400 / BOARD_SIZE; // 50px
+        
+        // Теперь поле хранит цвет (строку) или null, если пусто
+        let board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
+        let currentScore = 0;
+        
+        // ---------- БИБЛИОТЕКА ФИГУР (с цветами) ----------
+        const SHAPES_LIB = [
+            {   // квадрат 2x2
+                cells: [[0,0],[1,0],[0,1],[1,1]],
+                w:2, h:2,
+                color: "#6ab04c"  // зелёный
+            },
+            {   // палка горизонтальная 3x1
+                cells: [[0,0],[1,0],[2,0]],
+                w:3, h:1,
+                color: "#f0932b"  // оранжевый
+            },
+            {   // палка вертикальная 1x3
+                cells: [[0,0],[0,1],[0,2]],
+                w:1, h:3,
+                color: "#eb4d4b"  // красный
+            },
+            {   // L-образная (уголок)
+                cells: [[0,0],[1,0],[0,1]],
+                w:2, h:2,
+                color: "#7ed6df"  // бирюзовый
+            },
+            {   // зеркальная L
+                cells: [[0,0],[1,0],[1,1]],
+                w:2, h:2,
+                color: "#e056fd"  // фиолетовый
+            },
+            {   // домино 2x1
+                cells: [[0,0],[1,0]],
+                w:2, h:1,
+                color: "#22a6b3"  // сине-зелёный
+            },
+            {   // S-образная (зигзаг)
+                cells: [[1,0],[0,1],[1,1]],
+                w:2, h:2,
+                color: "#f9ca24"  // жёлтый
+            }
+        ];
+        
+        function getRandomShape() {
+            const idx = Math.floor(Math.random() * SHAPES_LIB.length);
+            const src = SHAPES_LIB[idx];
+            return {
+                cells: src.cells.map(cell => [cell[0], cell[1]]),
+                w: src.w,
+                h: src.h,
+                color: src.color
+            };
+        }
+        
+        let currentShapes = [];      // 3 фигуры
+        let activeShapeIndex = 0;
+        
+        // ---------- ПРОВЕРКА РАЗМЕЩЕНИЯ ----------
+        function canPlaceShape(shape, row, col) {
+            for(let cell of shape.cells) {
+                const r = row + cell[1];
+                const c = col + cell[0];
+                if(r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) return false;
+                if(board[r][c] !== null) return false;
+            }
+            return true;
+        }
+        
+        // РАЗМЕЩЕНИЕ (с цветом фигуры)
+        function placeShape(shape, row, col) {
+            for(let cell of shape.cells) {
+                const r = row + cell[1];
+                const c = col + cell[0];
+                board[r][c] = shape.color;
+            }
+        }
+        
+        // ОЧИСТКА строк и столбцов, начисление очков
+        function clearLinesAndColumns() {
+            let rowsToClear = [];
+            let colsToClear = [];
+            
+            for(let r = 0; r < BOARD_SIZE; r++) {
+                let full = true;
+                for(let c = 0; c < BOARD_SIZE; c++) {
+                    if(board[r][c] === null) { full = false; break; }
+                }
+                if(full) rowsToClear.push(r);
+            }
+            for(let c = 0; c < BOARD_SIZE; c++) {
+                let full = true;
+                for(let r = 0; r < BOARD_SIZE; r++) {
+                    if(board[r][c] === null) { full = false; break; }
+                }
+                if(full) colsToClear.push(c);
+            }
+            
+            if(rowsToClear.length === 0 && colsToClear.length === 0) return 0;
+            
+            for(let r of rowsToClear) {
+                for(let c = 0; c < BOARD_SIZE; c++) board[r][c] = null;
+            }
+            for(let c of colsToClear) {
+                for(let r = 0; r < BOARD_SIZE; r++) board[r][c] = null;
+            }
+            
+            let linesCount = rowsToClear.length + colsToClear.length;
+            let points = linesCount * 10;
+            if(linesCount >= 3) points += 15;
+            if(linesCount >= 5) points += 30;
+            currentScore += points;
+            updateScoreUI();
+            return linesCount;
+        }
+        
+        function hasAnyValidMove() {
+            for(let idx = 0; idx < currentShapes.length; idx++) {
+                const shape = currentShapes[idx];
+                for(let row = 0; row <= BOARD_SIZE - shape.h; row++) {
+                    for(let col = 0; col <= BOARD_SIZE - shape.w; col++) {
+                        if(canPlaceShape(shape, row, col)) return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // ---------- ОТРИСОВКА ПОЛЯ (с цветами) + опциональный предпросмотр ----------
+        const boardCanvas = document.getElementById("boardCanvas");
+        const ctx = boardCanvas.getContext("2d");
+        
+        // Переменные для предпросмотра (текущая позиция мыши)
+        let previewRow = -1, previewCol = -1;
+        let previewValid = false;
+        
+        function drawBoard() {
+            ctx.clearRect(0, 0, 400, 400);
+            // Фон и сетка
+            for(let r = 0; r < BOARD_SIZE; r++) {
+                for(let c = 0; c < BOARD_SIZE; c++) {
+                    const color = board[r][c];
+                    const x = c * CELL_SIZE;
+                    const y = r * CELL_SIZE;
+                    if(color) {
+                        // цветной блок
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x, y, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                        ctx.fillStyle = "#ffffff80";
+                        ctx.fillRect(x+2, y+2, CELL_SIZE-4.5, CELL_SIZE-4.5);
+                    } else {
+                        // пустая клетка
+                        ctx.fillStyle = "#1f3b44";
+                        ctx.fillRect(x, y, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                        ctx.fillStyle = "#2c5563";
+                        ctx.fillRect(x+1, y+1, CELL_SIZE-2.5, CELL_SIZE-2.5);
+                    }
+                }
+            }
+            // сетка
+            ctx.beginPath();
+            ctx.strokeStyle = "#8bbddb";
+            ctx.lineWidth = 1;
+            for(let i = 0; i <= BOARD_SIZE; i++) {
+                ctx.moveTo(i*CELL_SIZE, 0);
+                ctx.lineTo(i*CELL_SIZE, 400);
+                ctx.stroke();
+                ctx.moveTo(0, i*CELL_SIZE);
+                ctx.lineTo(400, i*CELL_SIZE);
+                ctx.stroke();
+            }
+            
+            // ----- ПРЕДПРОСМОТР активной фигуры (если есть и позиция валидна) -----
+            if(currentShapes.length > 0 && previewRow !== -1 && previewCol !== -1) {
+                const shape = currentShapes[activeShapeIndex];
+                // проверяем, что фигура влезает по границам и клеткам
+                let canPlace = true;
+                if(previewRow + shape.h > BOARD_SIZE || previewCol + shape.w > BOARD_SIZE) canPlace = false;
+                else canPlace = canPlaceShape(shape, previewRow, previewCol);
+                
+                if(canPlace) {
+                    // рисуем полупрозрачную заливку (зеленоватую)
+                    for(let cell of shape.cells) {
+                        const r = previewRow + cell[1];
+                        const c = previewCol + cell[0];
+                        if(r>=0 && r<BOARD_SIZE && c>=0 && c<BOARD_SIZE) {
+                            ctx.fillStyle = "#a0ffa0aa";
+                            ctx.fillRect(c*CELL_SIZE, r*CELL_SIZE, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                            ctx.fillStyle = "#ffffffaa";
+                            ctx.fillRect(c*CELL_SIZE+2, r*CELL_SIZE+2, CELL_SIZE-4.5, CELL_SIZE-4.5);
+                        }
+                    }
+                } else {
+                    // если нельзя поставить — красная подсветка
+                    for(let cell of shape.cells) {
+                        const r = previewRow + cell[1];
+                        const c = previewCol + cell[0];
+                        if(r>=0 && r<BOARD_SIZE && c>=0 && c<BOARD_SIZE) {
+                            ctx.fillStyle = "#ff8888aa";
+                            ctx.fillRect(c*CELL_SIZE, r*CELL_SIZE, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                            ctx.fillStyle = "#ffccccaa";
+                            ctx.fillRect(c*CELL_SIZE+2, r*CELL_SIZE+2, CELL_SIZE-4.5, CELL_SIZE-4.5);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // ---------- ОТРИСОВКА МЕНЮ ФИГУР (понятные, цветные) ----------
+        const shapesContainer = document.getElementById("shapesContainer");
+        function drawShapesUI() {
+            shapesContainer.innerHTML = "";
+            if(currentShapes.length === 0) {
+                shapesContainer.innerHTML = "<div style='color:#ccc'>Нет фигур, перезапустите</div>";
+                return;
+            }
+            for(let idx=0; idx<currentShapes.length; idx++) {
+                const shape = currentShapes[idx];
+                const cardDiv = document.createElement("div");
+                cardDiv.className = "shape-card";
+                if(idx === activeShapeIndex) cardDiv.classList.add("active");
+                
+                const canvas = document.createElement("canvas");
+                canvas.width = 90;
+                canvas.height = 90;
+                canvas.className = "shape-canvas";
+                const ctxShape = canvas.getContext("2d");
+                ctxShape.fillStyle = "#1f343f";
+                ctxShape.fillRect(0, 0, 90, 90);
+                
+                const maxW = shape.w;
+                const maxH = shape.h;
+                const cellW = 90 / maxW;
+                const cellH = 90 / maxH;
+                
+                for(let cell of shape.cells) {
+                    const cx = cell[0] * cellW;
+                    const cy = cell[1] * cellH;
+                    ctxShape.fillStyle = shape.color;
+                    ctxShape.fillRect(cx+2, cy+2, cellW-4, cellH-4);
+                    ctxShape.fillStyle = "#ffffffb3";
+                    ctxShape.fillRect(cx+5, cy+5, cellW-10, cellH-10);
+                }
+                // сетка
+                ctxShape.strokeStyle = "#ffffff60";
+                ctxShape.lineWidth = 1;
+                for(let i=0;i<=maxW;i++){
+                    ctxShape.beginPath();
+                    ctxShape.moveTo(i*cellW,0);
+                    ctxShape.lineTo(i*cellW,90);
+                    ctxShape.stroke();
+                    ctxShape.moveTo(0,i*cellH);
+                    ctxShape.lineTo(90,i*cellH);
+                    ctxShape.stroke();
+                }
+                cardDiv.appendChild(canvas);
+                cardDiv.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    activeShapeIndex = idx;
+                    drawShapesUI();
+                    drawBoard();  // обновить предпросмотр (сбросить мышь? но оставим)
+                });
+                shapesContainer.appendChild(cardDiv);
+            }
+        }
+        
+        function updateScoreUI() {
+            document.getElementById("scoreValue").innerText = currentScore;
+        }
+        
+        // ---------- ПОПЫТКА РАЗМЕСТИТЬ ФИГУРУ ПО КООРДИНАТАМ (row, col) ----------
+        function tryPlaceActiveShapeAt(row, col) {
+            if(currentShapes.length === 0) return false;
+            const shape = currentShapes[activeShapeIndex];
+            if(row + shape.h > BOARD_SIZE || col + shape.w > BOARD_SIZE) return false;
+            if(canPlaceShape(shape, row, col)) {
+                placeShape(shape, row, col);
+                // удаляем фигуру
+                currentShapes.splice(activeShapeIndex, 1);
+                // добавляем новую
+                currentShapes.push(getRandomShape());
+                activeShapeIndex = 0;
+                if(currentShapes.length === 0) activeShapeIndex = 0;
+                else activeShapeIndex = Math.min(activeShapeIndex, currentShapes.length-1);
+                
+                clearLinesAndColumns();
+                drawBoard();
+                drawShapesUI();
+                
+                if(!hasAnyValidMove()) {
+                    document.getElementById("gameOverMsg").style.display = "block";
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        // ---------- ОБРАБОТЧИКИ МЫШИ ДЛЯ ПРЕДПРОСМОТРА ----------
+        function handleMouseMove(e) {
+            if(currentShapes.length === 0) return;
+            const rect = boardCanvas.getBoundingClientRect();
+            const scaleX = boardCanvas.width / rect.width;
+            const scaleY = boardCanvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX;
+            let mouseY = (e.clientY - rect.top) * scaleY;
+            if(mouseX < 0 || mouseX >= 400 || mouseY < 0 || mouseY >= 400) {
+                previewRow = -1;
+                previewCol = -1;
+                drawBoard();
+                return;
+            }
+            const col = Math.floor(mouseX / CELL_SIZE);
+            const row = Math.floor(mouseY / CELL_SIZE);
+            previewRow = row;
+            previewCol = col;
+            drawBoard();
+        }
+        
+        function handleMouseLeave() {
+            previewRow = -1;
+            previewCol = -1;
+            drawBoard();
+        }
+        
+        function handleBoardClick(e) {
+            if(currentShapes.length === 0) return;
+            const rect = boardCanvas.getBoundingClientRect();
+            const scaleX = boardCanvas.width / rect.width;
+            const scaleY = boardCanvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX;
+            let mouseY = (e.clientY - rect.top) * scaleY;
+            if(mouseX < 0 || mouseX >= 400 || mouseY < 0 || mouseY >= 400) return;
+            const col = Math.floor(mouseX / CELL_SIZE);
+            const row = Math.floor(mouseY / CELL_SIZE);
+            tryPlaceActiveShapeAt(row, col);
+            // после клика сбрасываем предпросмотр, чтобы не было артефактов
+            previewRow = -1;
+            previewCol = -1;
+            drawBoard();
+        }
+        
+        boardCanvas.addEventListener("click", handleBoardClick);
+        boardCanvas.addEventListener("mousemove", handleMouseMove);
+        boardCanvas.addEventListener("mouseleave", handleMouseLeave);
+        
+        // ---------- ПЕРЕЗАПУСК ----------
+        function restartGame() {
+            // очищаем поле (null)
+            board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
+            currentScore = 0;
+            updateScoreUI();
+            // генерируем 3 фигуры
+            currentShapes = [];
+            for(let i=0; i<3; i++) currentShapes.push(getRandomShape());
+            activeShapeIndex = 0;
+            previewRow = -1;
+            previewCol = -1;
+            document.getElementById("gameOverMsg").style.display = "none";
+            drawBoard();
+            drawShapesUI();
+        }
+        
+        document.getElementById("restartGame").addEventListener("click", () => {
+            restartGame();
+        });
+        
+        // СТАРТ
+        restartGame();
+    })();
+</script>
+</body>
+</html>
