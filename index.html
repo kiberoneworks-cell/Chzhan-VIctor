@@ -509,11 +509,7 @@
 
     // дополнительно: если какие-то внешние ссылки или ещё что, предотвращаем переход для всех a с классом project-link / contact-item (уже обработали)
     // также защита от случайных переходов в проектах через хеш
-    const allDemoAnchors = document.querySelectorAll('.project-link, .demo-contact');
-    allDemoAnchors.forEach(anchor => {
-      anchor.setAttribute('href', 'javascript:void(0);');
-      // но обработчики уже стоят, поэтому дополнительно не нужно ломать
-    });
+
     
     // Обновим текст в блоке о возрасте в тексте (на всякий случай)
     const aboutAgeSpans = document.querySelectorAll('#age-value, #age-in-text');
