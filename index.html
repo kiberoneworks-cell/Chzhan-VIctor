@@ -484,14 +484,7 @@
     }
 
     // ---------- 3. ОБРАБОТЧИКИ ДЛЯ ВСЕХ ССЫЛОК ПРОЕКТОВ ----------
-    const projectLinks = document.querySelectorAll('.project-link');
-    projectLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const projectName = link.getAttribute('data-project') || 'этот проект';
-        showToast(`🔗 Ссылка на проект «${projectName}» — демо-версия скоро будет доступна! Спасибо за интерес ✨`, 2500);
-      });
-    });
+
 
     // ---------- 4. ОБРАБОТЧИКИ ДЛЯ КОНТАКТОВ (ДЕМО-РЕЖИМ) ----------
     const contactItems = document.querySelectorAll('.demo-contact');
